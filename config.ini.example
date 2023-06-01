@@ -1,0 +1,5 @@
+[gemfury]
+token = insert-token-here
+
+[targets]
+owner/repo = ^release-asset-pattern.deb$
