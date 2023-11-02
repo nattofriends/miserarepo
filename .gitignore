@@ -1,1 +1,7 @@
-config.ini
+debian/*
+!debian/changelog
+!debian/compat
+!debian/control
+!debian/dirs
+!debian/install
+!debian/rules

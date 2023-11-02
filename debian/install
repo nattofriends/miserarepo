@@ -1,0 +1,3 @@
+src/miserarepo /usr/sbin
+src/miserarepo.ini /etc
+src/miserarepo.list /etc/apt/sources.list.d

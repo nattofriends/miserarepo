@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+
+import json
+import re
+import os
+from configparser import ConfigParser
+from os.path import exists
+from os.path import join
+from subprocess import check_output
+from subprocess import check_call
+from urllib.request import urlopen
+
+GITHUB_API = "https://api.github.com/repos/{}/releases/latest"
+
+
+def main():
+    config = ConfigParser()
+    config.read("/etc/miserarepo.ini")
+
+    for repo, pattern in config['targets'].items():
+        resp = json.load(urlopen(GITHUB_API.format(repo)))
+        pattern = re.compile(pattern)
+        for asset in resp['assets']:
+            if pattern.search(asset['name']):
+                local_path = join(
+                    config['system']['packages'],
+                    asset['name'],
+                )
+
+                if exists(local_path):
+                    print(f"Already have {asset['name']} at {local_path}, skipping")
+                    continue
+
+                print(f"Downloading {asset['name']}")
+
+                check_call([
+                    "curl",
+                    "-L",
+                    "-o",
+                    local_path,
+                    asset['browser_download_url'],
+                ])
+
+    os.chdir(config['system']['packages'])
+    packages = check_output(
+        ('dpkg-scanpackages', '.'),
+        text=True,
+    ).strip()
+
+    with open(join(config['system']['packages'], "Packages"), 'w') as fh:
+        fh.write(packages)
+
+
+if __name__ == '__main__':
+    main()
